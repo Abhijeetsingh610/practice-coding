@@ -3,6 +3,7 @@ This is a **Coding Problems Dashboard** built with **Next.js**, **Supabase**, an
 ✅ Search coding problems by problem name or ID.  
 ✅ Filter problems by company.  
 ✅ Paginate through coding problems efficiently.  
+
 🔗 **[Live Demo](https://practice-coding-chi.vercel.app/)**  
 ---
 ## 📸 **Preview**  
