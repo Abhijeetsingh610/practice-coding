@@ -130,7 +130,7 @@ export function CodingProblemsDashboard() {
       {/* ✅ Filters Section */}
       <div className="bg-slate-800/50 p-6 rounded-xl shadow-lg backdrop-blur-sm border border-slate-700">
         <h2 className="text-xl font-semibold mb-4 text-slate-100">Filters</h2>
-        
+
         {/* ✅ Flex container for Company Filter and Search */}
         <div className="flex gap-4 items-end">
           {/* ✅ Company Filter */}
@@ -196,6 +196,17 @@ export function CodingProblemsDashboard() {
           Next
         </Button>
       </div>
+
+      {/* ✅ Footer */}
+      <footer className="mt-8 text-center text-slate-400">
+        Made by <span className="font-semibold text-slate-200">Abhijeet Singh</span> |  
+        <a href="https://www.linkedin.com/in/singhabhijeet16/" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           className="text-blue-400 hover:underline ml-1">
+          LinkedIn
+        </a>
+      </footer>
     </div>
   )
 }
