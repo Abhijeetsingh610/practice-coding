@@ -139,17 +139,24 @@ export function CodingProblemsDashboard() {
               Select Company
             </label>
             <Select value={selectedCompany} onValueChange={(value) => setSelectedCompany(value === "all" ? "" : value)}>
-              <SelectTrigger className="bg-slate-700 border-slate-600">
+              <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-200">
                 <SelectValue placeholder="All Companies" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="all">All Companies</SelectItem>
+              <SelectContent className="bg-slate-700 border-slate-600 text-slate-400">
+                <SelectItem value="all" className="hover:bg-slate-600">
+                  All Companies
+                </SelectItem>
                 {companies.map((company) => (
-                  <SelectItem key={company} value={company}>
+                  <SelectItem
+                    key={company}
+                    value={company}
+                    className="hover:bg-slate-600 text-slate-200"
+                  >
                     {company}
                   </SelectItem>
                 ))}
               </SelectContent>
+
             </Select>
           </div>
 
@@ -199,11 +206,11 @@ export function CodingProblemsDashboard() {
 
       {/* ✅ Footer */}
       <footer className="mt-8 text-center text-slate-400">
-        Made by <span className="font-semibold text-slate-200">Abhijeet Singh</span> |  
-        <a href="https://www.linkedin.com/in/singhabhijeet16/" 
-           target="_blank" 
-           rel="noopener noreferrer" 
-           className="text-blue-400 hover:underline ml-1">
+        Made by <span className="font-semibold text-slate-200">Abhijeet Singh</span> |
+        <a href="https://www.linkedin.com/in/singhabhijeet16/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-400 hover:underline ml-1">
           LinkedIn
         </a>
       </footer>

@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Practice-Coding',
-  description: 'Created Abhijeet Singh',
+  description: 'Created by Abhijeet Singh',
   generator: '',
 }
 
