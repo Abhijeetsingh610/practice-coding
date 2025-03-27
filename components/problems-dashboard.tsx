@@ -194,9 +194,10 @@ export function ProblemsDashboard() {
         className="mb-8 text-center"
       >
         <h1 className="bg-gradient-to-r from-blue-600 via-purple-500 to-teal-400 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
-          Coding Problems Dashboard
+          Your Gateway to FAANG & Beyond
         </h1>
-        <p className="mt-4 text-gray-600 dark:text-gray-300">Find and solve coding problems from top tech companies</p>
+        <p className="mt-4 text-gray-600 dark:text-gray-300">Ace Every Interview</p>
+        <p className="mt-2 text-gray-600 dark:text-gray-300">Practice company-specific coding questions and level up for your dream job.</p>
       </motion.div>
 
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -244,6 +245,20 @@ export function ProblemsDashboard() {
           <p className="text-lg text-gray-600 dark:text-gray-300">No problems found. Try adjusting your filters.</p>
         </motion.div>
       )}
+
+
+      <footer className="mt-8 text-center text-sm text-slate-400">
+        Made with ❤️ by{" "}
+        <a
+          href="https://www.linkedin.com/in/singhabhijeet16/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-slate-200 hover:underline"
+        >
+          Abhijeet Singh
+        </a>        
+      </footer>
+
     </div>
   )
 }

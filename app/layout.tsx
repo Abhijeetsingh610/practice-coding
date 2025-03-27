@@ -9,9 +9,9 @@ import { Navbar } from "@/components/navbar"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Coding Problems Dashboard",
+  title: "AceCode",
   description: "Find and solve coding problems from top tech companies",
-    generator: 'v0.dev'
+    generator: ''
 }
 
 export default function RootLayout({
