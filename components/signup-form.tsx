@@ -88,7 +88,7 @@ export function SignupForm() {
         setSuccess("Please check your email for a confirmation link to complete your registration.")
       } else {
         // Redirect to login page on successful signup
-        router.push("/login?message=Account created successfully. Please log in.")
+        router.push("/login?message=Please check your email for a confirmation link to complete your registration.")
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.")
