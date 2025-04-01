@@ -1,10 +1,10 @@
-import { getSupabase } from "@/lib/supabase"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
     const { userId, email, name } = await request.json()
-    const supabase = getSupabase()
+    const supabase = getSupabaseAdmin()
 
     // Check if profile already exists
     const { data: existingProfile } = await supabase.from("profiles").select("*").eq("id", userId).single()

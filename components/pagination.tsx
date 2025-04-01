@@ -11,43 +11,54 @@ interface PaginationProps {
 }
 
 export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
-  const canGoPrevious = currentPage > 1
-  const canGoNext = currentPage < totalPages
+  // Ensure valid values
+  const validCurrentPage = Math.max(1, Math.min(currentPage, Math.max(1, totalPages)))
+  const validTotalPages = Math.max(1, totalPages)
+
+  const canGoPrevious = validCurrentPage > 1
+  const canGoNext = validCurrentPage < validTotalPages
 
   // Generate page numbers to display
   const getPageNumbers = () => {
     const pageNumbers = []
     const maxPagesToShow = 5
 
-    if (totalPages <= maxPagesToShow) {
+    if (validTotalPages <= maxPagesToShow) {
       // Show all pages if total pages is less than or equal to maxPagesToShow
-      for (let i = 1; i <= totalPages; i++) {
+      for (let i = 1; i <= validTotalPages; i++) {
         pageNumbers.push(i)
       }
     } else {
       // Always include first page, last page, current page, and pages around current page
       pageNumbers.push(1)
 
-      if (currentPage > 3) {
+      if (validCurrentPage > 3) {
         pageNumbers.push(-1) // Ellipsis
       }
 
       // Pages around current page
-      const startPage = Math.max(2, currentPage - 1)
-      const endPage = Math.min(totalPages - 1, currentPage + 1)
+      const startPage = Math.max(2, validCurrentPage - 1)
+      const endPage = Math.min(validTotalPages - 1, validCurrentPage + 1)
 
       for (let i = startPage; i <= endPage; i++) {
         pageNumbers.push(i)
       }
 
-      if (currentPage < totalPages - 2) {
+      if (validCurrentPage < validTotalPages - 2) {
         pageNumbers.push(-2) // Ellipsis
       }
 
-      pageNumbers.push(totalPages)
+      pageNumbers.push(validTotalPages)
     }
 
     return pageNumbers
+  }
+
+  // Handle page change with validation
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= validTotalPages) {
+      onPageChange(page)
+    }
   }
 
   return (
@@ -60,7 +71,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       <Button
         variant="outline"
         size="icon"
-        onClick={() => onPageChange(1)}
+        onClick={() => handlePageChange(1)}
         disabled={!canGoPrevious}
         aria-label="First page"
       >
@@ -69,7 +80,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       <Button
         variant="outline"
         size="icon"
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={() => handlePageChange(validCurrentPage - 1)}
         disabled={!canGoPrevious}
         aria-label="Previous page"
       >
@@ -88,10 +99,10 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         return (
           <Button
             key={pageNumber}
-            variant={currentPage === pageNumber ? "default" : "outline"}
-            onClick={() => onPageChange(pageNumber)}
+            variant={validCurrentPage === pageNumber ? "default" : "outline"}
+            onClick={() => handlePageChange(pageNumber)}
             aria-label={`Page ${pageNumber}`}
-            aria-current={currentPage === pageNumber ? "page" : undefined}
+            aria-current={validCurrentPage === pageNumber ? "page" : undefined}
           >
             {pageNumber}
           </Button>
@@ -101,7 +112,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       <Button
         variant="outline"
         size="icon"
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={() => handlePageChange(validCurrentPage + 1)}
         disabled={!canGoNext}
         aria-label="Next page"
       >
@@ -110,7 +121,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       <Button
         variant="outline"
         size="icon"
-        onClick={() => onPageChange(totalPages)}
+        onClick={() => handlePageChange(validTotalPages)}
         disabled={!canGoNext}
         aria-label="Last page"
       >

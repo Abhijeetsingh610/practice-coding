@@ -1,20 +1,20 @@
 "use client"
 
-import { AlertDescription } from "@/components/ui/alert"
-
-import { Alert } from "@/components/ui/alert"
-
-import { useState, useEffect } from "react"
-import { getSupabase } from "@/lib/supabase"
-import type { CodingProblem, CompanyOption, PaginationState } from "@/types"
+import { useState, useEffect, useTransition } from "react"
+import type { CompanyOption, PaginationState, CodingProblem } from "@/types"
 import { SearchBar } from "./search-bar"
 import { ProblemCard } from "./problem-card"
 import { CompanyFilter } from "./company-filter"
 import { Pagination } from "./pagination"
 import { motion } from "framer-motion"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useDebounce } from "@/hooks/use-debounce"
+import { useProblems } from "@/hooks/use-api"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
 // Constants
-const PAGE_SIZE = 100
+const PAGE_SIZE = 50
 const COMPANY_NAMES = [
   "accenture",
   "accolite",
@@ -80,20 +80,33 @@ const COMPANY_NAMES = [
   "zoom",
 ]
 
-export function ProblemsDashboard() {
-  const [problems, setProblems] = useState<CodingProblem[]>([])
-  const [filteredProblems, setFilteredProblems] = useState<CodingProblem[]>([])
+type SortOption = "none" | "easy-first" | "hard-first"
+
+// Add this to the component props
+interface ProblemsDashboardProps {
+  initialData?: {
+    data: CodingProblem[]
+    count: number
+    pagination: PaginationState
+  }
+}
+
+export function ProblemsDashboard({ initialData }: ProblemsDashboardProps) {
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  // Get URL parameters with defaults
+  const page = Number.parseInt(searchParams.get("page") || "1")
+  const companyParam = searchParams.get("company")
+  const sortParam = searchParams.get("sort") || "none"
+  const searchQuery = searchParams.get("search") || ""
+
+  // Local state
   const [companies, setCompanies] = useState<CompanyOption[]>([])
-  const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [pagination, setPagination] = useState<PaginationState>({
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-  })
-  const supabase = getSupabase()
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
+  const debouncedSearchQuery = useDebounce(localSearchQuery, 500)
 
   // Format company names for the dropdown
   useEffect(() => {
@@ -107,83 +120,96 @@ export function ProblemsDashboard() {
     setCompanies(formattedCompanies)
   }, [])
 
-  // Fetch problems from Supabase when company changes
+  // Update the useProblems hook to use initialData
+  const {
+    data: problemsData,
+    isLoading,
+    error: queryError,
+  } = useProblems(page, companyParam, sortParam as SortOption, {
+    initialData: initialData && page === 1 && !companyParam && sortParam === "none" ? initialData : undefined,
+  })
+
+  // Update URL when search query changes (debounced)
   useEffect(() => {
-    async function fetchProblems() {
-      try {
-        setLoading(true)
-        setError(null)
+    if (debouncedSearchQuery !== searchQuery) {
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams)
 
-        // Build the query
-        let query = supabase.from("coding_problems").select("*", { count: "exact" })
-
-        // Apply company filter if selected
-        if (selectedCompany) {
-          query = query.eq("company_name", selectedCompany)
+        if (debouncedSearchQuery) {
+          params.set("search", debouncedSearchQuery)
+        } else {
+          params.delete("search")
         }
 
-        // Apply pagination
-        const from = (pagination.currentPage - 1) * PAGE_SIZE
-        const to = from + PAGE_SIZE - 1
-        query = query.range(from, to)
+        // Reset to page 1 when search changes
+        params.set("page", "1")
 
-        // Execute the query
-        const { data, error, count } = await query
-
-        if (error) {
-          throw error
-        }
-
-        if (data) {
-          setProblems(data as CodingProblem[])
-
-          // Update pagination
-          if (count !== null) {
-            setPagination((prev) => ({
-              ...prev,
-              totalItems: count,
-              totalPages: Math.ceil(count / PAGE_SIZE),
-            }))
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching problems:", error)
-        setError("Failed to load problems. Please try again later.")
-      } finally {
-        setLoading(false)
-      }
+        router.replace(`${pathname}?${params.toString()}`)
+      })
     }
+  }, [debouncedSearchQuery, searchQuery, searchParams, pathname, router])
 
-    fetchProblems()
-  }, [selectedCompany, pagination.currentPage])
-
-  // Filter problems based on search query
-  useEffect(() => {
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      const filtered = problems.filter(
+  // Filter problems based on search query (client-side)
+  const filteredProblems = problemsData?.data
+    ? problemsData.data.filter(
         (problem) =>
-          problem.problem_name.toLowerCase().includes(query) ||
-          problem.company_name.toLowerCase().includes(query) ||
-          problem.problem_id.toLowerCase().includes(query),
+          !debouncedSearchQuery ||
+          problem.problem_name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+          problem.company_name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+          problem.problem_id.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
       )
-      setFilteredProblems(filtered)
-    } else {
-      setFilteredProblems(problems)
-    }
-  }, [problems, searchQuery])
+    : []
+
+  // Update URL parameters
+  const updateUrlParams = (params: Record<string, string | null>) => {
+    startTransition(() => {
+      const newParams = new URLSearchParams(searchParams)
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === null) {
+          newParams.delete(key)
+        } else {
+          newParams.set(key, value)
+        }
+      })
+
+      router.replace(`${pathname}?${newParams.toString()}`)
+    })
+  }
 
   // Handle company selection
   const handleCompanySelect = (company: string | null) => {
-    setSelectedCompany(company)
-    setPagination((prev) => ({ ...prev, currentPage: 1 })) // Reset to first page
+    updateUrlParams({ company: company, page: "1" })
+  }
+
+  // Handle sort option change
+  const handleSortChange = (value: string) => {
+    updateUrlParams({ sort: value, page: "1" })
   }
 
   // Handle page change
-  const handlePageChange = (page: number) => {
-    setPagination((prev) => ({ ...prev, currentPage: page }))
+  const handlePageChange = (newPage: number) => {
+    updateUrlParams({ page: newPage.toString() })
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
+
+  // Handle search query change
+  const handleSearch = (query: string) => {
+    setLocalSearchQuery(query)
+  }
+
+  // Extract pagination data with safe defaults
+  const pagination = problemsData?.pagination || {
+    currentPage: page,
+    pageSize: PAGE_SIZE,
+    totalPages: 1,
+    totalItems: 0,
+    from: 0,
+    to: 0,
+  }
+
+  // Format error message
+  const errorMessage = queryError ? (queryError instanceof Error ? queryError.message : "An error occurred") : null
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -194,24 +220,36 @@ export function ProblemsDashboard() {
         className="mb-8 text-center"
       >
         <h1 className="bg-gradient-to-r from-blue-600 via-purple-500 to-teal-400 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
-          Your Gateway to FAANG & Beyond
+        Your Gateway to FAANG & Beyond
         </h1>
         <p className="mt-4 text-gray-600 dark:text-gray-300">Ace Every Interview</p>
         <p className="mt-2 text-gray-600 dark:text-gray-300">Practice company-specific coding questions and level up for your dream job.</p>
       </motion.div>
 
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <SearchBar onSearch={setSearchQuery} />
-        <CompanyFilter companies={companies} selectedCompany={selectedCompany} onSelectCompany={handleCompanySelect} />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <SearchBar onSearch={handleSearch} initialValue={searchQuery} />
+          <Select value={sortParam as string} onValueChange={handleSortChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by difficulty" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No sorting</SelectItem>
+              <SelectItem value="easy-first">Easy to Hard</SelectItem>
+              <SelectItem value="hard-first">Hard to Easy</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <CompanyFilter companies={companies} selectedCompany={companyParam} onSelectCompany={handleCompanySelect} />
       </div>
 
-      {error && (
+      {errorMessage && (
         <Alert variant="destructive" className="mb-6">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
-      {loading ? (
+      {isLoading || isPending ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, index) => (
             <div key={index} className="h-40 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800" />
@@ -233,9 +271,13 @@ export function ProblemsDashboard() {
                 onPageChange={handlePageChange}
               />
               <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                Showing {(pagination.currentPage - 1) * PAGE_SIZE + 1} to{" "}
-                {Math.min(pagination.currentPage * PAGE_SIZE, pagination.totalItems)} of {pagination.totalItems}{" "}
-                problems
+                {pagination.totalItems > 0 ? (
+                  <>
+                    Showing {pagination.from} to {pagination.to} of {pagination.totalItems} problems
+                  </>
+                ) : (
+                  "No problems found"
+                )}
               </p>
             </div>
           )}
@@ -246,8 +288,8 @@ export function ProblemsDashboard() {
         </motion.div>
       )}
 
-
-      <footer className="mt-8 text-center text-sm text-slate-400">
+      
+    <footer className="mt-8 text-center text-sm text-slate-400">
         Made with ❤️ by{" "}
         <a
           href="https://www.linkedin.com/in/singhabhijeet16/"

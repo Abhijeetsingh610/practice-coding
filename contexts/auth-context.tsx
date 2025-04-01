@@ -34,6 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+
+  // Use the singleton Supabase instance
   const supabase = getSupabase()
 
   useEffect(() => {

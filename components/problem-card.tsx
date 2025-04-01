@@ -4,6 +4,7 @@ import type { CodingProblem } from "@/types"
 import { DifficultyBadge } from "./difficulty-badge"
 import { ExternalLink } from "lucide-react"
 import { motion } from "framer-motion"
+import { ProblemActions } from "./problem-actions"
 
 interface ProblemCardProps {
   problem: CodingProblem
@@ -38,7 +39,8 @@ export function ProblemCard({ problem, index }: ProblemCardProps) {
           <DifficultyBadge difficulty={problem.difficulty as "Easy" | "Medium" | "Hard"} />
         </div>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{formatCompanyName(problem.company_name)}</p>
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex items-center justify-between">
+          <ProblemActions problemId={problem.id} />
           <a
             href={problem.url}
             target="_blank"

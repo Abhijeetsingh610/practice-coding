@@ -5,7 +5,7 @@ import { ThemeToggle } from "./theme-toggle"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Code } from "lucide-react"
+import { Code, User } from "lucide-react"
 
 export function Navbar() {
   const { user } = useAuth()
@@ -20,7 +20,15 @@ export function Navbar() {
 
         <div className="flex items-center space-x-4">
           {user ? (
-            <UserProfile />
+            <>
+              <Link href="/profile">
+                <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
+                </Button>
+              </Link>
+              <UserProfile />
+            </>
           ) : (
             <div className="flex items-center space-x-2">
               <Link href="/login">
