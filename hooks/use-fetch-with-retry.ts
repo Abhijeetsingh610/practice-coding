@@ -82,4 +82,3 @@ export async function fetchWithRetry(
   // This should never happen, but TypeScript needs a return statement
   throw lastError || new Error(`Failed after ${maxRetries} retries`)
 }
-

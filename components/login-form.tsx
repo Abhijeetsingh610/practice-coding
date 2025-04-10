@@ -106,4 +106,3 @@ export function LoginForm() {
     </motion.div>
   )
 }
-

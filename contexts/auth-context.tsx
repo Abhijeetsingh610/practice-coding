@@ -25,6 +25,7 @@ type AuthContextType = {
     data: any
   }>
   signOut: () => Promise<void>
+  updateUserMetadata: (metadata: Record<string, any>) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -38,6 +39,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Use the singleton Supabase instance
   const supabase = getSupabase()
 
+  // Ensure user profile exists
+  const ensureProfile = async (userId: string, userData: any) => {
+    try {
+      // Check if we have user metadata
+      const name = userData?.user_metadata?.full_name || ""
+      const email = userData?.email || ""
+
+      if (!userId || !email) return
+
+      // Call the API to create/update profile
+      await fetch("/api/create-profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          email,
+          name,
+        }),
+      })
+    } catch (error) {
+      console.error("Error ensuring profile exists:", error)
+    }
+  }
+
   useEffect(() => {
     const setData = async () => {
       try {
@@ -48,12 +75,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (error) {
           console.error("Error getting session:", error)
+
+          // If it's a refresh token error, clear the session and redirect to login
+          if (error.message?.includes("refresh_token_not_found") || error.message?.includes("invalid refresh token")) {
+            await supabase.auth.signOut()
+            router.push("/login?message=Your session has expired. Please log in again.")
+          }
+
           setIsLoading(false)
           return
         }
 
         setSession(session)
         setUser(session?.user ?? null)
+
+        // Ensure profile exists for the user
+        if (session?.user) {
+          await ensureProfile(session.user.id, session.user)
+        }
       } catch (error) {
         console.error("Unexpected error during session check:", error)
       } finally {
@@ -64,9 +103,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "TOKEN_REFRESHED" || event === "SIGNED_IN") {
+        setSession(session)
+        setUser(session?.user ?? null)
+
+        // Ensure profile exists when user signs in
+        if (session?.user) {
+          await ensureProfile(session.user.id, session.user)
+        }
+      } else if (event === "SIGNED_OUT") {
+        setSession(null)
+        setUser(null)
+      } else if (event === "USER_UPDATED") {
+        // Update the user state when user metadata changes
+        setUser(session?.user ?? null)
+      }
     })
 
     setData()
@@ -74,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [router])
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
@@ -130,6 +182,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { data: null, error }
       }
 
+      // Ensure profile exists for the user
+      if (data?.user) {
+        await ensureProfile(data.user.id, data.user)
+      }
+
       return { data, error: null }
     } catch (error) {
       console.error("Unexpected error during sign in:", error)
@@ -151,6 +208,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Add method to update user metadata
+  const updateUserMetadata = async (metadata: Record<string, any>) => {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: metadata,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      // Update the local user state
+      if (data.user) {
+        setUser(data.user)
+      }
+    } catch (error) {
+      console.error("Error updating user metadata:", error)
+      throw error
+    }
+  }
+
   const value = {
     user,
     session,
@@ -158,6 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     signIn,
     signOut,
+    updateUserMetadata,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
@@ -170,4 +249,3 @@ export const useAuth = () => {
   }
   return context
 }
-

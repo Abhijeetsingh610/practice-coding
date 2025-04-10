@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { getSupabase } from "@/lib/supabase"
 
 export function SignupForm() {
   const [name, setName] = useState("")
@@ -26,6 +27,7 @@ export function SignupForm() {
 
   const createProfile = async (userId: string) => {
     try {
+      // First, try to create the profile using the API route
       const response = await fetch("/api/create-profile", {
         method: "POST",
         headers: {
@@ -39,10 +41,29 @@ export function SignupForm() {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to create profile")
+        // If the API route fails, try direct Supabase insertion as a fallback
+        console.warn("API route failed, trying direct Supabase insertion")
+        const supabase = getSupabase()
+
+        const { error: insertError } = await supabase.from("profiles").insert([
+          {
+            id: userId,
+            full_name: name,
+            email: email,
+            updated_at: new Date().toISOString(),
+          },
+        ])
+
+        if (insertError) {
+          console.error("Error creating profile via direct insertion:", insertError)
+          throw new Error("Failed to create profile")
+        }
       }
+
+      return true
     } catch (error) {
       console.error("Error creating profile:", error)
+      return false
     }
   }
 
@@ -80,7 +101,10 @@ export function SignupForm() {
 
       // Create profile if user was created
       if (data?.user?.id) {
-        await createProfile(data.user.id)
+        const profileCreated = await createProfile(data.user.id)
+        if (!profileCreated) {
+          console.warn("Profile creation may have failed, but continuing with signup process")
+        }
       }
 
       // Check if email confirmation is required
@@ -88,7 +112,7 @@ export function SignupForm() {
         setSuccess("Please check your email for a confirmation link to complete your registration.")
       } else {
         // Redirect to login page on successful signup
-        router.push("/login?message=Please check your email for a confirmation link to complete your registration.")
+        router.push("/login?message=Account created successfully. Please log in.")
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.")
@@ -182,4 +206,3 @@ export function SignupForm() {
     </motion.div>
   )
 }
-

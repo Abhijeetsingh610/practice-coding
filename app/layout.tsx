@@ -6,13 +6,14 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/contexts/auth-context"
 import { Navbar } from "@/components/navbar"
 import { QueryProvider } from "@/components/providers/query-provider"
+import { Toaster } from "@/components/ui/toast"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "AceCode",
   description: "Find and solve coding problems from top tech companies",
-    generator: ''
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -29,6 +30,7 @@ export default function RootLayout({
               <div className="flex min-h-screen flex-col">
                 <Navbar />
                 <main className="flex-1">{children}</main>
+                <Toaster />
               </div>
             </AuthProvider>
           </QueryProvider>
@@ -37,7 +39,6 @@ export default function RootLayout({
     </html>
   )
 }
-
 
 
 import './globals.css'

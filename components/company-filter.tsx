@@ -79,4 +79,3 @@ export function CompanyFilter({ companies, selectedCompany, onSelectCompany }: C
     </motion.div>
   )
 }
-

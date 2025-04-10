@@ -1,15 +1,11 @@
 "use client"
 
-import { useAuth } from "@/contexts/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
-import { UserStats } from "@/components/user-stats"
-import { UserProblemsList } from "@/components/user-problems-list"
 import { motion } from "framer-motion"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { LeaderboardFull } from "@/components/leaderboard-full"
 
-export default function ProfilePage() {
-  const { user } = useAuth()
-
+export default function LeaderboardPage() {
   return (
     <ProtectedRoute>
       <div className="container mx-auto px-4 py-8">
@@ -20,18 +16,14 @@ export default function ProfilePage() {
           className="mb-8 text-center"
         >
           <h1 className="bg-gradient-to-r from-blue-600 via-purple-500 to-teal-400 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
-            Your Profile
+            Monthly Leaderboard
           </h1>
-          <p className="mt-4 text-gray-600 dark:text-gray-300">Track your progress and manage your coding problems</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Top problem solvers for this month</p>
         </motion.div>
 
-        <div className="space-y-8">
+        <div className="max-w-3xl mx-auto">
           <ErrorBoundary>
-            <UserStats />
-          </ErrorBoundary>
-
-          <ErrorBoundary>
-            <UserProblemsList />
+            <LeaderboardFull />
           </ErrorBoundary>
         </div>
       </div>

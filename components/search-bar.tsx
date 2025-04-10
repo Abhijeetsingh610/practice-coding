@@ -47,4 +47,3 @@ export function SearchBar({ onSearch, placeholder = "Search problems...", initia
     </motion.div>
   )
 }
-

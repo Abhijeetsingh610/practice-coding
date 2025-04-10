@@ -220,10 +220,10 @@ export function ProblemsDashboard({ initialData }: ProblemsDashboardProps) {
         className="mb-8 text-center"
       >
         <h1 className="bg-gradient-to-r from-blue-600 via-purple-500 to-teal-400 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
-        Your Gateway to FAANG & Beyond
+          Your Gateway to FAANG & Beyond
         </h1>
+        <p className="mt-4 text-gray-600 dark:text-gray-300">Practice company-specific coding questions and level up for your dream job.</p>
         <p className="mt-4 text-gray-600 dark:text-gray-300">Ace Every Interview</p>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">Practice company-specific coding questions and level up for your dream job.</p>
       </motion.div>
 
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -288,8 +288,7 @@ export function ProblemsDashboard({ initialData }: ProblemsDashboardProps) {
         </motion.div>
       )}
 
-      
-    <footer className="mt-8 text-center text-sm text-slate-400">
+          <footer className="mt-8 text-center text-sm text-slate-400">
         Made with ❤️ by{" "}
         <a
           href="https://www.linkedin.com/in/singhabhijeet16/"
@@ -300,8 +299,7 @@ export function ProblemsDashboard({ initialData }: ProblemsDashboardProps) {
           Abhijeet Singh
         </a>        
       </footer>
-
+      
     </div>
   )
 }
-

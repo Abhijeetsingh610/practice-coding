@@ -89,4 +89,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message || "Error fetching problems" }, { status: 500 })
   }
 }
-

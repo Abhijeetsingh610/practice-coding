@@ -14,6 +14,7 @@ export function getSupabase() {
         persistSession: typeof window !== "undefined", // Only persist session on client-side
         autoRefreshToken: true,
         detectSessionInUrl: typeof window !== "undefined", // Only detect session in URL on client-side
+        storageKey: "supabase.auth.token", // Specify the storage key
       },
     })
   }
@@ -31,4 +32,3 @@ export function createServerSupabase() {
     },
   })
 }
-

@@ -54,4 +54,3 @@ export function ProblemCard({ problem, index }: ProblemCardProps) {
     </motion.div>
   )
 }
-

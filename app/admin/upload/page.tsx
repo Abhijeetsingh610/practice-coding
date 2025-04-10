@@ -1,15 +1,9 @@
 "use client"
-
-import { useAuth } from "@/contexts/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
-import { UserStats } from "@/components/user-stats"
-import { UserProblemsList } from "@/components/user-problems-list"
+import { UploadPDFForm } from "@/components/upload-pdf-form"
 import { motion } from "framer-motion"
-import { ErrorBoundary } from "@/components/error-boundary"
 
-export default function ProfilePage() {
-  const { user } = useAuth()
-
+export default function UploadPage() {
   return (
     <ProtectedRoute>
       <div className="container mx-auto px-4 py-8">
@@ -20,19 +14,15 @@ export default function ProfilePage() {
           className="mb-8 text-center"
         >
           <h1 className="bg-gradient-to-r from-blue-600 via-purple-500 to-teal-400 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
-            Your Profile
+            Upload Cheatsheets
           </h1>
-          <p className="mt-4 text-gray-600 dark:text-gray-300">Track your progress and manage your coding problems</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">
+            Upload PDF cheatsheets for different programming topics
+          </p>
         </motion.div>
 
-        <div className="space-y-8">
-          <ErrorBoundary>
-            <UserStats />
-          </ErrorBoundary>
-
-          <ErrorBoundary>
-            <UserProblemsList />
-          </ErrorBoundary>
+        <div className="max-w-md mx-auto">
+          <UploadPDFForm />
         </div>
       </div>
     </ProtectedRoute>

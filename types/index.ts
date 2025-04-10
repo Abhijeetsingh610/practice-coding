@@ -39,4 +39,3 @@ export interface UserProblemStats {
   saved: number
   total: number
 }
-
