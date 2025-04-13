@@ -3,9 +3,34 @@ import { ProblemsDashboard } from "@/components/problems-dashboard"
 import { ProtectedRoute } from "@/components/protected-route"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import { Skeleton } from "@/components/ui/skeleton"
+import type { Metadata } from "next"
 
 // Number of problems to pre-fetch on the server
 const INITIAL_PAGE_SIZE = 50
+
+// Enhanced metadata for the home page
+export const metadata: Metadata = {
+  title: "AceCode – Crack FAANG Interviews with Real Company Questions",
+  description:
+    "Practice company-specific coding questions from FAANG and top tech companies. Track your progress, access curated resources, and prepare for your dream job interviews.",
+  alternates: {
+    canonical: "https://faangcode.vercel.app/",
+  },
+  openGraph: {
+    title: "AceCode – Crack FAANG Interviews with Real Company Questions",
+    description:
+      "Practice company-specific coding questions from FAANG and top tech companies. Track your progress, access curated resources, and prepare for your dream job interviews.",
+    url: "https://faangcode.vercel.app/",
+    images: [
+      {
+        url: "https://faangcode.vercel.app/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "AceCode - Your coding interview preparation platform",
+      },
+    ],
+  },
+}
 
 // This function runs on the server during SSR
 async function getInitialProblems() {
