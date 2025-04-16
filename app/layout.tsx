@@ -93,10 +93,9 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   verification: {
-    google: "google-site-verification-code", // Replace with your actual verification code
+    google: "cSIEEuj6dNGbJFOCiNwZf9Ir1RMeWjJ_qdGWRmHtYDw",
   },
   category: "technology",
-    generator: 'v0.dev'
 }
 
 // Viewport metadata
@@ -187,6 +186,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-import './globals.css'
